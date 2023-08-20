@@ -43,8 +43,9 @@ public class CalendarQuickstart {
      * Global instance of the scopes required by this quickstart.
      * If modifying these scopes, delete your previously saved tokens/ folder.
      */
-    private static final List<String> SCOPES =
-//            Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
+    private static final List<String> SCOPES_READ_ONLY =
+            Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
+    private static final List<String> SCOPES_WRITE =
             Collections.singletonList(CalendarScopes.CALENDAR_EVENTS);
     private static final String CREDENTIALS_FILE_PATH =
             "/client_secret_xxxxx.apps.googleusercontent.com.json";
@@ -53,10 +54,11 @@ public class CalendarQuickstart {
      * Creates an authorized Credential object.
      *
      * @param HTTP_TRANSPORT The network HTTP Transport.
+     * @param scopes
      * @return An authorized Credential object.
      * @throws IOException If the credentials.json file cannot be found.
      */
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT)
+    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, List<String> scopes)
             throws IOException {
         // Load client secrets.
         InputStream in = CalendarQuickstart.class.getResourceAsStream(CREDENTIALS_FILE_PATH);
@@ -68,7 +70,7 @@ public class CalendarQuickstart {
 
         // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
+                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, scopes)
                 .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
                 .setAccessType("offline")
                 .build();
@@ -107,7 +109,15 @@ public class CalendarQuickstart {
     }
 
     public static Calendar getCalendarService(NetHttpTransport httpTransport) throws IOException {
-        return new Calendar.Builder(httpTransport, JSON_FACTORY, getCredentials(httpTransport))
+        return getCalendarServiceWritable(httpTransport, false);
+    }
+
+    public static Calendar getCalendarServiceWritable(NetHttpTransport httpTransport, boolean writeScope) throws IOException {
+        return getCalendarServiceWithScope(httpTransport, writeScope? SCOPES_WRITE : SCOPES_READ_ONLY);
+    }
+
+    private static Calendar getCalendarServiceWithScope(NetHttpTransport httpTransport, List<String> scopes) throws IOException {
+        return new Calendar.Builder(httpTransport, JSON_FACTORY, getCredentials(httpTransport, scopes))
                 .setApplicationName(APPLICATION_NAME)
                 .build();
     }

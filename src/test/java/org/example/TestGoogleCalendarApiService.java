@@ -30,13 +30,13 @@ public class TestGoogleCalendarApiService {
 
     @Test
     void getCalendarService() throws IOException {
-        Calendar service = CalendarQuickstart.getCalendarService(httpTransport);
+        Calendar service = CalendarQuickstart.getCalendarServiceWritable(httpTransport, true);
         assertNotNull(service);
     }
 
     @Test
     void getListOfEvents() throws IOException {
-        final Calendar service = CalendarQuickstart.getCalendarService(httpTransport);
+        final Calendar service = CalendarQuickstart.getCalendarServiceWritable(httpTransport, true);
         DateTime now = new DateTime(System.currentTimeMillis());
         Events events = service.events().list("primary")
                 .setMaxResults(100)
@@ -60,7 +60,7 @@ public class TestGoogleCalendarApiService {
                 "meniny",
                 "narodeniny");
 
-        final Calendar service = CalendarQuickstart.getCalendarService(httpTransport);
+        final Calendar service = CalendarQuickstart.getCalendarServiceWritable(httpTransport, true);
 
         for (String eventSummary : eventsToDelete) {
             deleteAllReccurrenciesOfEventWithSummary(eventSummary, service);
