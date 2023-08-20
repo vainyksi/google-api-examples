@@ -45,7 +45,8 @@ public class CalendarQuickstart {
      */
     private static final List<String> SCOPES =
             Collections.singletonList(CalendarScopes.CALENDAR_READONLY);
-    private static final String CREDENTIALS_FILE_PATH = "/credentials.json";
+    private static final String CREDENTIALS_FILE_PATH =
+            "/client_secret_xxxxx.apps.googleusercontent.com.json";
 
     /**
      * Creates an authorized Credential object.
