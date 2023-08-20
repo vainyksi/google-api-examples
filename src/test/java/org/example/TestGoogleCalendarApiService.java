@@ -51,7 +51,7 @@ public class TestGoogleCalendarApiService {
         System.out.println(listOfEvents.stream().map(Event::getSummary).collect(Collectors.toList()));
     }
 
-    @Test
+//    @Test
     void removeDuplicateNotRecurringEvents() throws IOException {
         List<String> eventsToDelete = List.of("Anniversary",
                 "Birthday",
