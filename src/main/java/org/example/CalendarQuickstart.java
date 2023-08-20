@@ -109,6 +109,8 @@ public class CalendarQuickstart {
     }
 
     public static Calendar getCalendarService(NetHttpTransport httpTransport) throws IOException {
-        return null;
+        return new Calendar.Builder(httpTransport, JSON_FACTORY, getCredentials(httpTransport))
+                .setApplicationName(APPLICATION_NAME)
+                .build();
     }
 }
