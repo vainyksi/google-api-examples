@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -19,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class TestGoogleCalendarApiService {
 
+    public static final String CALENDAR_ID = "primary";
     private NetHttpTransport httpTransport;
 
     @BeforeEach
@@ -37,7 +39,7 @@ public class TestGoogleCalendarApiService {
         final Calendar service = CalendarQuickstart.getCalendarService(httpTransport);
         DateTime now = new DateTime(System.currentTimeMillis());
         Events events = service.events().list("primary")
-                .setMaxResults(10)
+                .setMaxResults(100)
                 .setTimeMin(now)
                 .setOrderBy("startTime")
                 .setSingleEvents(true)
@@ -46,7 +48,51 @@ public class TestGoogleCalendarApiService {
         List<Event> listOfEvents = events.getItems();
         assertNotNull(listOfEvents);
         assertFalse(listOfEvents.isEmpty());
+        System.out.println(listOfEvents.stream().map(Event::getSummary).collect(Collectors.toList()));
     }
 
+    @Test
+    void removeDuplicateNotRecurringEvents() throws IOException {
+        List<String> eventsToDelete = List.of("Anniversary",
+                "Birthday",
+                "vyrocie",
+                "narodky",
+                "meniny",
+                "narodeniny");
 
+        final Calendar service = CalendarQuickstart.getCalendarService(httpTransport);
+
+        for (String eventSummary : eventsToDelete) {
+            deleteAllReccurrenciesOfEventWithSummary(eventSummary, service);
+        }
+    }
+
+    private void deleteAllReccurrenciesOfEventWithSummary(String eventSummary, Calendar service) throws IOException {
+        DateTime now = new DateTime(System.currentTimeMillis());
+        Events events = service.events().list(CALENDAR_ID)
+                .setMaxResults(100)
+                .setTimeMin(now)
+                .setOrderBy("startTime")
+                .setSingleEvents(true)
+                .setQ(eventSummary)
+                .execute();
+
+        events.getItems().stream()
+                .map(Event::getId)
+                .forEach(eventId -> {
+                    System.out.println("deleting event (summary: " + eventSummary + ") \t\t ID: " + eventId);
+                    deleteEvent(eventId, service);
+                });
+
+    }
+
+    private static void deleteEvent(String eventId, Calendar service) {
+        try {
+            service.events()
+                    .delete(CALENDAR_ID, eventId)
+                    .execute();
+        } catch (IOException e) {
+            System.err.println("Could not delete event with ID: " + eventId);
+        }
+    }
 }
